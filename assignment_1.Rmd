@@ -19,9 +19,10 @@ When you click the **Knit** button a document will be generated that includes bo
 ```{r cars}
 #importing tidyverse for cleaning our data
 library(tidyverse)
+library(lubridate)
 #reading csv file for bikeseoul dataset
 bike_seoul<-read_csv('BikeSeoul.csv')
-#viewing the dataset.
+#viewing the dataset's appearance.
 summary(bike_seoul)
 head(bike_seoul)
 bike_seoul[bike_seoul$`Functioning Day`=='Yes',]
@@ -31,7 +32,9 @@ bike_seoul<-bike_seoul%>%select(-starts_with("Visibility"),-starts_with("Dew"),-
   filter(`Rented Bike Count` !=0)%>%#filtering out where no data was collected for bike count
   select(-'Functioning Day')%>%#removing functioning day column
 rename(Date=Date,Count="Rented Bike Count", Hour="Hour",Temperature="Temperature(C)",
-       Humidity ="Humidity(%)",WindSpeed="Wind speed (m/s)",Season="Seasons",Holiday="Holiday")#renaming columns
+       Humidity ="Humidity(%)",WindSpeed="Wind speed (m/s)",Season="Seasons",Holiday="Holiday")%>%#renaming columns
+  mutate(Date=as.Date(Date,tryFormats=c("%d-%m-%Y", "%d/%m/%Y")))%>%# Converting Date to date object
+  mutate(FullDate=make_datetime(day =day(Date),month = month(Date),year = year(Date),hour = Hour))#a new column is added, called FullDate which includes the hour in it 
 ```
 
 ## Including Plots
