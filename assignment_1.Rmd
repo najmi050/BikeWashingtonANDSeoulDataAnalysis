@@ -16,7 +16,7 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
+```{r MY Assignment, echo=TRUE}
 #importing tidyverse for cleaning our data
 library(tidyverse)
 library(lubridate)
@@ -49,6 +49,7 @@ bike_seoul <-
 bike_washington<-read_csv('BikeWashingtonDC.csv')
 summary(bike_washington)
 colnames(bike_washington)
+bike_washington$holiday
 bike_washington<-bike_washington%>%#Removing columns: instant, yr, mnth, weekday, workingday, weathersit, atemp, casual and registered users
   select(-"instant",-"yr",-"mnth",
          -"weekday",-"workingday",
@@ -58,18 +59,45 @@ bike_washington<-bike_washington%>%#Removing columns: instant, yr, mnth, weekday
   mutate(Season = factor(Season, levels = c("1", "2", '3', '4'),labels = c("Winter","Spring","Summer","Autumn")))%>%#changing factor levels of seasons
   mutate(Season = factor(Season, levels = c("Spring", "Summer", 'Autumn', 'Winter')))%>%#ordering them the same way as in seoul dataset
   mutate(Date = as.Date(Date, tryFormats = c("%d-%m-%Y", "%d/%m/%Y")))%>% #converting date to date object
-  mutate(Holiday = factor(Holiday,levels = c('Holiday', 'No Holiday'),labels = c('Yes', 'No')))%>%
+  mutate(Holiday = factor(Holiday,levels = c('1', '0'),labels = c('Yes', 'No')))%>%
   mutate(FullDate = make_datetime(day = day(Date),month = month(Date),year = year(Date),hour = Hour))#adding Fulldate column
 bike_washington$Humidity<-sapply(bike_washington$Humidity,function(vec,n){return(vec*n) },n=100)#scaling humidity by multiplying it by 100
 bike_washington$WindSpeed<-sapply(bike_washington$WindSpeed,function(vec,n){return(vec*n)},n=(67000/(60*60)))#scaling windspeed by multiplying it by 67000/3600(67km/hr) to get it in m/s
+#Visualization Part
+#Seoul dataset visulization
+ggplot(bike_seoul)+
+  geom_point(aes(x=Date,y=Temperature,colour=Season))#the visualization shows the pattern of temperature rise and fall throughout the year.
+
+ggplot(bike_seoul)+
+  geom_point(aes(x=Date,y=Temperature,colour=Season))+#Temperatures of different seasons seperated.
+  facet_wrap(~Season)
+ggplot(bike_seoul)+geom_point(aes(x=Holiday,y=Count,colour=Holiday))#Holiday and No holiday count shows more bikes rented on working days.
+ggplot(bike_seoul)+geom_point(aes(x=Hour,y=Count,colour=Temperature))#the peak time for renting bike was shown around 8 am and 2-9 pm.
+ggplot(bike_seoul)+geom_point(aes(x=Temperature,y=Count))+stat_smooth(aes(x=Temperature,y=Count),method="lm")#Shows increase in bikes rented as temperature rises.
+ggplot(bike_seoul)+geom_point(aes(x=WindSpeed,y=Count))+stat_smooth(aes(x=WindSpeed,y=Count),method="lm")#A slight slope shows there is some increase in bikes rented in breezy (windy) condition.
+ggplot(bike_seoul)+geom_point(aes(x=Humidity,y=Count))+stat_smooth(aes(x=Humidity,y=Count),method = "lm")#Strong decrease in rented bikes with increased humidity
+#Washington dataset visualization
+ggplot(bike_washington)+
+  geom_point(aes(x=Date,y=Temperature,colour=Season))#the visualization shows the pattern of temperature rise and fall throughout the year in Washington.
+
+ggplot(bike_washington)+#Temperatures of different seasons seperated.
+  geom_point(aes(x=Date,y=Temperature,colour=Season))+
+  facet_wrap(~Season)
+ggplot(bike_washington)+geom_point(aes(x=Holiday,y=Count,colour=Holiday))#Similar to Seoul, Holiday and No holiday bike rented count shows more bikes rented on working days.
+ggplot(bike_washington)+geom_point(aes(x=Hour,y=Count,colour=Temperature))#Peak times for renting a bike is around 7 or 8 am and stays high from 12-6 pm.
+ggplot(bike_washington)+geom_point(aes(x=Temperature,y=Count))+stat_smooth(aes(x=Temperature,y=Count),method="lm")#Similar to Seoul, shows increase in bikes rented as temperature rises.
+ggplot(bike_washington)+geom_point(aes(x=WindSpeed,y=Count))+stat_smooth(aes(x=WindSpeed,y=Count),method="lm")#Again similar to Seoul's, slight slope shows there is some increase in bikes rented in breezy (windy) condition.
+ggplot(bike_washington)+geom_point(aes(x=Humidity,y=Count))+stat_smooth(aes(x=Humidity,y=Count),method = "lm")#Sharper decrease in rented bikes than Seoul as humidity rises.
+
 ```
 
-## Including Plots
+## Visualization Part
 
 You can also embed plots, for example:
 
-```{r pressure, eval=FALSE, include=FALSE}
-plot(pressure)
+```{r pressure, echo=FALSE, message=FALSE}
+
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
