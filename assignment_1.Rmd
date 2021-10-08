@@ -10,46 +10,31 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Report by 210034046
 
 ```{r MY Assignment, echo=TRUE}
-#importing tidyverse for cleaning our data
+#importing tidyverse for cleaning our data and lubridate for date functions
 library(tidyverse)
 library(lubridate)
 #reading csv file for bikeseoul dataset
 bike_seoul <- read_csv('BikeSeoul.csv')
-#viewing the dataset's appearance.
-summary(bike_seoul)
-head(bike_seoul)
-bike_seoul[bike_seoul$`Functioning Day` == 'Yes', ]
-filter(bike_seoul, `Functioning Day` == 'No')
 
-
+#Bike Seoul Data Wrangling/Cleaning
 bike_seoul <-
-  bike_seoul %>% select(
-    -starts_with("Visibility"),
-    -starts_with("Dew"),
-    -starts_with("Solar"),
-    -starts_with("Rain"),
-    -starts_with("Snow")
-  ) %>%#removing columns for visibility, dew point temperature, solar radiation, rainfall and snowfall.
+  bike_seoul %>% select(-starts_with("Visibility"),-starts_with("Dew"),
+                        -starts_with("Solar"),-starts_with("Rain"),-starts_with("Snow")) %>%
+  #removing columns for visibility, dew point temperature, solar radiation, rainfall and snowfall.
   filter(`Rented Bike Count` != 0) %>% #filtering out where no data was collected for bike count
   select(-'Functioning Day') %>% #removing functioning day column
   rename(Date = Date, Count = "Rented Bike Count",Hour = "Hour",Temperature = "Temperature(C)",Humidity = "Humidity(%)",
     WindSpeed = "Wind speed (m/s)",Season = "Seasons", Holiday = "Holiday") %>% #renaming columns
   mutate(Date = as.Date(Date, tryFormats = c("%d-%m-%Y", "%d/%m/%Y"))) %>%# Converting Date to date object
   mutate(FullDate = make_datetime(day = day(Date),month = month(Date),year = year(Date),hour = Hour)) %>% #a new column is added, called FullDate which includes the hour in it
-  mutate(Holiday = factor(Holiday,levels = c('Holiday', 'No Holiday'),labels = c('Yes', 'No'))) %>% #Holiday fator level changed to Yes/No
+  mutate(Holiday = factor(Holiday,levels = c('Holiday', 'No Holiday'),labels = c('Yes', 'No'))) %>% #Holiday factor level changed to Yes/No
   mutate(Season = factor(Season, levels = c("Spring", "Summer", 'Autumn', 'Winter')))#Factor order level changed for Season as specified i.e Spring, Summer, Autumn and Winter
 
 bike_washington<-read_csv('BikeWashingtonDC.csv')
-summary(bike_washington)
-colnames(bike_washington)
-bike_washington$holiday
+
 bike_washington<-bike_washington%>%#Removing columns: instant, yr, mnth, weekday, workingday, weathersit, atemp, casual and registered users
   select(-"instant",-"yr",-"mnth",
          -"weekday",-"workingday",
@@ -66,38 +51,113 @@ bike_washington$WindSpeed<-sapply(bike_washington$WindSpeed,function(vec,n){retu
 #Visualization Part
 #Seoul dataset visulization
 ggplot(bike_seoul)+
-  geom_point(aes(x=Date,y=Temperature,colour=Season))#the visualization shows the pattern of temperature rise and fall throughout the year.
+  geom_point(aes(x=Date,y=Temperature,colour=Season))+
+  ggtitle("Plot Temperature over time: Seoul")
+#the visualization shows the pattern of temperature rise and fall throughout the year.
 
 ggplot(bike_seoul)+
-  geom_point(aes(x=Date,y=Temperature,colour=Season))+#Temperatures of different seasons seperated.
-  facet_wrap(~Season)
-ggplot(bike_seoul)+geom_point(aes(x=Holiday,y=Count,colour=Holiday))#Holiday and No holiday count shows more bikes rented on working days.
-ggplot(bike_seoul)+geom_point(aes(x=Hour,y=Count,colour=Temperature))#the peak time for renting bike was shown around 8 am and 2-9 pm.
-ggplot(bike_seoul)+geom_point(aes(x=Temperature,y=Count))+stat_smooth(aes(x=Temperature,y=Count),method="lm")#Shows increase in bikes rented as temperature rises.
-ggplot(bike_seoul)+geom_point(aes(x=WindSpeed,y=Count))+stat_smooth(aes(x=WindSpeed,y=Count),method="lm")#A slight slope shows there is some increase in bikes rented in breezy (windy) condition.
-ggplot(bike_seoul)+geom_point(aes(x=Humidity,y=Count))+stat_smooth(aes(x=Humidity,y=Count),method = "lm")#Strong decrease in rented bikes with increased humidity
-#Washington dataset visualization
-ggplot(bike_washington)+
-  geom_point(aes(x=Date,y=Temperature,colour=Season))#the visualization shows the pattern of temperature rise and fall throughout the year in Washington.
-
-ggplot(bike_washington)+#Temperatures of different seasons seperated.
   geom_point(aes(x=Date,y=Temperature,colour=Season))+
-  facet_wrap(~Season)
-ggplot(bike_washington)+geom_point(aes(x=Holiday,y=Count,colour=Holiday))#Similar to Seoul, Holiday and No holiday bike rented count shows more bikes rented on working days.
-ggplot(bike_washington)+geom_point(aes(x=Hour,y=Count,colour=Temperature))#Peak times for renting a bike is around 7 or 8 am and stays high from 12-6 pm.
-ggplot(bike_washington)+geom_point(aes(x=Temperature,y=Count))+stat_smooth(aes(x=Temperature,y=Count),method="lm")#Similar to Seoul, shows increase in bikes rented as temperature rises.
-ggplot(bike_washington)+geom_point(aes(x=WindSpeed,y=Count))+stat_smooth(aes(x=WindSpeed,y=Count),method="lm")#Again similar to Seoul's, slight slope shows there is some increase in bikes rented in breezy (windy) condition.
-ggplot(bike_washington)+geom_point(aes(x=Humidity,y=Count))+stat_smooth(aes(x=Humidity,y=Count),method = "lm")#Sharper decrease in rented bikes than Seoul as humidity rises.
+  facet_wrap(~Season)+
+  ggtitle("Plots for Each Season's temperature Seperated: Seoul")
+#Temperatures of different seasons seperated.
+ggplot(bike_seoul)+geom_point(aes(x=Holiday,y=Count,colour=Holiday))+
+  ggtitle("Plot for Holiday/Non-holiday bike count: Seoul")
+#Holiday and No holiday count shows more bikes rented on working days.
+ggplot(bike_seoul)+geom_point(aes(x=Hour,y=Count,colour=Temperature))+
+ggtitle("Plot for hourly rented bike count: Seoul")
+#The peak time for renting bike is shown around 8 am and 2-9 pm.
+ggplot(bike_seoul)+geom_point(aes(x=Temperature,y=Count))+stat_smooth(aes(x=Temperature,y=Count),method="lm")+
+  ggtitle("Plot for Temperature vs Rented bikes: Seoul")
+#Shows increase in bikes rented as temperature rises.
+ggplot(bike_seoul)+geom_point(aes(x=WindSpeed,y=Count))+
+  stat_smooth(aes(x=WindSpeed,y=Count),method="lm")+
+  ggtitle("Plot for WindSpeed vs Rented bike count: Seoul")
+#Shows increase in bikes rented in windy condition.
+ggplot(bike_seoul)+geom_point(aes(x=Humidity,y=Count))+stat_smooth(aes(x=Humidity,y=Count),method = "lm")+
+  ggtitle("Plot for Humidity Vs Rented bike count: Seoul")
+#Strong decrease in rented bikes with increased humidity
+
+#Washington dataset visualization
+
+ggplot(bike_washington)+
+  geom_point(aes(x=Date,y=Temperature,colour=Season))+
+  ggtitle("Plot Temperature over time: Washington")
+#Shows the pattern of temperature rise and fall throughout the year in Washington.
+ggplot(bike_washington)+
+  geom_point(aes(x=Date,y=Temperature,colour=Season))+
+  facet_wrap(~Season)+
+  ggtitle("Plots for Each Season's temperature Seperated: Washington")
+#Temperatures of different seasons seperated.
+ggplot(bike_washington)+geom_point(aes(x=Holiday,y=Count,colour=Holiday))+
+  ggtitle("Plot for Holiday/Non-holiday bike count: Washington")
+#Similar to Seoul, Holiday and No holiday bike rented count shows more bikes rented on working days.
+
+ggplot(bike_washington)+geom_point(aes(x=Hour,y=Count,colour=Temperature))+
+  ggtitle("Plot for hourly rented bike count: Washington")
+#Peak times for renting a bike is around 7 or 8 am and stays high from 12-6 pm.
+
+ggplot(bike_washington)+geom_point(aes(x=Temperature,y=Count))+stat_smooth(aes(x=Temperature,y=Count),method="lm")+
+  ggtitle("Plot for Temperature vs Rented bikes: Washington")
+#Similar to Seoul, shows increase in bikes rented as temperature rises.
+
+ggplot(bike_washington)+geom_point(aes(x=WindSpeed,y=Count))+
+  stat_smooth(aes(x=WindSpeed,y=Count),method="lm")+
+  ggtitle("Plot for WindSpeed vs Rented bike count: Washington")
+#Again similar to Seoul's, slight increase in bikes rented as it gets more windy.
+
+ggplot(bike_washington)+geom_point(aes(x=Humidity,y=Count))+
+  stat_smooth(aes(x=Humidity,y=Count),method = "lm")+
+  ggtitle("Plot for Humidity Vs Rented bike count: Seoul")
+#Sharper decrease in rented bikes than Seoul with humidity increase.
+
+##STATISCAL MODELLING
+
+#Bike Seoul Model
+
+bike_seoul$LoggedCount<-log10(bike_seoul$Count)
+#log count as outcome
+
+seoul_model<-lm(LoggedCount~Season+Temperature+Humidity+WindSpeed,data=bike_seoul)
+#predictors are season, temperature, humidity windspeed
+
+summary(seoul_model)
+#It shows that the predictors Autumn, Winter, Temperature, Humidity and windspeed, have significance.
+#Therefore, rejects the null hypothesis, of them being equal to zero.
+
+confint(seoul_model,level = 0.97)
+#97% confidence intervals for the estimated regression co-efficients, 
+#they are reliable as sample size is large 8465.
+
+df_pred<-data.frame(Season="Winter",Temperature=0,WindSpeed=0.5,Humidity=20)
+#values for the model's prediction to be based upon.
+
+predict(seoul_model,newdata = df_pred)
+#2.568 bikes rented in Seoul
+
+predict(seoul_model,newdata = df_pred,interval = "prediction",level = 0.90)
+#Therefore, we are (90%) confident with the given parameters, 
+#would at least rent 1.97 bikes and at maximum 3.2 bikes.
+
+#Bike Washington Model
+bike_washington$LoggedCount<-log10(bike_washington$Count)
+washington_model<-lm(LoggedCount~Season+Temperature+Humidity+WindSpeed,data=bike_washington)
+
+summary(washington_model)
+#In Washington the predictors, Summer,Autumn, Winter, temperature, 
+#Humidity and Wind speed all have significance, rejecting the null hypothesis of them being zero.
+
+confint(washington_model,level = 0.97)
+#As we have quite a large sample size of 17379, the confidence intervals for the co-efficients are reliable. 
+
+predict(washington_model,newdata = df_pred)
+#1.58 bikes rented in Washington
+
+predict(washington_model,newdata = df_pred,interval = "prediction",level = 0.90)
+#Therefore, we are (90%) confident with the given parameters,
+#would at least rent 0.68 bikes and at maximum 2.48 bikes.
+
 
 ```
 
-## Visualization Part
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE, message=FALSE}
 
 
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
