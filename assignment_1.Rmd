@@ -21,23 +21,24 @@ When you click the **Knit** button a document will be generated that includes bo
 library(tidyverse)
 #reading csv file for bikeseoul dataset
 bike_seoul<-read_csv('BikeSeoul.csv')
-#viewing the dataset's appearance.
+#viewing the dataset.
 summary(bike_seoul)
 head(bike_seoul)
+bike_seoul[bike_seoul$`Functioning Day`=='Yes',]
+filter(bike_seoul,`Functioning Day`=='No')
 #removing columns for visibility, dew point temperature, solar radiation, rainfall and snowfall.
-bike_seoul<-select(bike_seoul,-starts_with("Visibility"),-starts_with("Dew"),-starts_with("Solar"),-starts_with("Rain"),-starts_with("Snow"))
-#filtering out where no data was collected for bike count
-bike_seoul<-filter(bike_seoul,`Rented Bike Count` !=0)
-#removing functioning day column
-bike_seoul<-select(bike_seoul,-'Functioning Day')
-
+bike_seoul<-bike_seoul%>%select(-starts_with("Visibility"),-starts_with("Dew"),-starts_with("Solar"),-starts_with("Rain"),-starts_with("Snow"))%>%
+  filter(`Rented Bike Count` !=0)%>%#filtering out where no data was collected for bike count
+  select(-'Functioning Day')%>%#removing functioning day column
+rename(Date=Date,Count="Rented Bike Count", Hour="Hour",Temperature="Temperature(C)",
+       Humidity ="Humidity(%)",WindSpeed="Wind speed (m/s)",Season="Seasons",Holiday="Holiday")#renaming columns
 ```
 
 ## Including Plots
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
+```{r pressure, eval=FALSE, include=FALSE}
 plot(pressure)
 ```
 
