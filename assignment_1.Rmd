@@ -17,7 +17,18 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r cars}
-summary(cars)
+library(tidyverse)
+bike_seoul<-read_csv('BikeSeoul.csv')
+summary(bike_seoul)
+head(bike_seoul)
+bike_seoul_nofun<-filter(bike_seoul,'Functioning Day'!="Yes")
+summary(bike_seoul_nofun)
+bike_seoul<-select(bike_seoul,-starts_with("Visibility"),-starts_with("Dew"),-starts_with("Solar"),-starts_with("Rain"),-starts_with("Snow"))
+bike_seoul
+bike_seoul<-filter(bike_seoul,'Functioning Day' == "Yes")
+bike_seoul<-select(bike_seoul,-'Functioning Day')
+bike_seoul
+
 ```
 
 ## Including Plots
