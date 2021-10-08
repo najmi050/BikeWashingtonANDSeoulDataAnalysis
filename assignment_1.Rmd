@@ -1,5 +1,5 @@
 ---
-title: "1st Assignment MT5763"
+title: "MT5763: 1st Assignment"
 output:
   pdf_document: default
   html_document: default
@@ -17,7 +17,7 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r cars}
-#importing tidyverse for cleaning our data
+#importing tidyverse for cleaning our data and lubridate for datetime functions
 library(tidyverse)
 library(lubridate)
 #reading csv file for bikeseoul dataset
@@ -34,7 +34,9 @@ bike_seoul<-bike_seoul%>%select(-starts_with("Visibility"),-starts_with("Dew"),-
 rename(Date=Date,Count="Rented Bike Count", Hour="Hour",Temperature="Temperature(C)",
        Humidity ="Humidity(%)",WindSpeed="Wind speed (m/s)",Season="Seasons",Holiday="Holiday")%>%#renaming columns
   mutate(Date=as.Date(Date,tryFormats=c("%d-%m-%Y", "%d/%m/%Y")))%>%# Converting Date to date object
-  mutate(FullDate=make_datetime(day =day(Date),month = month(Date),year = year(Date),hour = Hour))#a new column is added, called FullDate which includes the hour in it 
+  mutate(FullDate=make_datetime(day =day(Date),month = month(Date),year = year(Date),hour = Hour))%>%#a new column is added, called FullDate which includes the hour in it 
+mutate(Holiday=factor(Holiday,levels = c('Holiday','No Holiday'),labels = c('Yes','No')))%>%#Holiday fator level changed to Yes/No
+  mutate(Season=factor(Season,levels = c("Spring","Summer",'Autumn', 'Winter')))#Factor order level changed for Season as specified i.e Spring, Summer, Autumn and Winter
 ```
 
 ## Including Plots
