@@ -17,26 +17,51 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r cars}
-#importing tidyverse for cleaning our data and lubridate for datetime functions
+#importing tidyverse for cleaning our data
 library(tidyverse)
 library(lubridate)
 #reading csv file for bikeseoul dataset
-bike_seoul<-read_csv('BikeSeoul.csv')
+bike_seoul <- read_csv('BikeSeoul.csv')
 #viewing the dataset's appearance.
 summary(bike_seoul)
 head(bike_seoul)
-bike_seoul[bike_seoul$`Functioning Day`=='Yes',]
-filter(bike_seoul,`Functioning Day`=='No')
-#removing columns for visibility, dew point temperature, solar radiation, rainfall and snowfall.
-bike_seoul<-bike_seoul%>%select(-starts_with("Visibility"),-starts_with("Dew"),-starts_with("Solar"),-starts_with("Rain"),-starts_with("Snow"))%>%
-  filter(`Rented Bike Count` !=0)%>%#filtering out where no data was collected for bike count
-  select(-'Functioning Day')%>%#removing functioning day column
-rename(Date=Date,Count="Rented Bike Count", Hour="Hour",Temperature="Temperature(C)",
-       Humidity ="Humidity(%)",WindSpeed="Wind speed (m/s)",Season="Seasons",Holiday="Holiday")%>%#renaming columns
-  mutate(Date=as.Date(Date,tryFormats=c("%d-%m-%Y", "%d/%m/%Y")))%>%# Converting Date to date object
-  mutate(FullDate=make_datetime(day =day(Date),month = month(Date),year = year(Date),hour = Hour))%>%#a new column is added, called FullDate which includes the hour in it 
-mutate(Holiday=factor(Holiday,levels = c('Holiday','No Holiday'),labels = c('Yes','No')))%>%#Holiday fator level changed to Yes/No
-  mutate(Season=factor(Season,levels = c("Spring","Summer",'Autumn', 'Winter')))#Factor order level changed for Season as specified i.e Spring, Summer, Autumn and Winter
+bike_seoul[bike_seoul$`Functioning Day` == 'Yes', ]
+filter(bike_seoul, `Functioning Day` == 'No')
+
+
+bike_seoul <-
+  bike_seoul %>% select(
+    -starts_with("Visibility"),
+    -starts_with("Dew"),
+    -starts_with("Solar"),
+    -starts_with("Rain"),
+    -starts_with("Snow")
+  ) %>%#removing columns for visibility, dew point temperature, solar radiation, rainfall and snowfall.
+  filter(`Rented Bike Count` != 0) %>% #filtering out where no data was collected for bike count
+  select(-'Functioning Day') %>% #removing functioning day column
+  rename(Date = Date, Count = "Rented Bike Count",Hour = "Hour",Temperature = "Temperature(C)",Humidity = "Humidity(%)",
+    WindSpeed = "Wind speed (m/s)",Season = "Seasons", Holiday = "Holiday") %>% #renaming columns
+  mutate(Date = as.Date(Date, tryFormats = c("%d-%m-%Y", "%d/%m/%Y"))) %>%# Converting Date to date object
+  mutate(FullDate = make_datetime(day = day(Date),month = month(Date),year = year(Date),hour = Hour)) %>% #a new column is added, called FullDate which includes the hour in it
+  mutate(Holiday = factor(Holiday,levels = c('Holiday', 'No Holiday'),labels = c('Yes', 'No'))) %>% #Holiday fator level changed to Yes/No
+  mutate(Season = factor(Season, levels = c("Spring", "Summer", 'Autumn', 'Winter')))#Factor order level changed for Season as specified i.e Spring, Summer, Autumn and Winter
+
+bike_washington<-read_csv('BikeWashingtonDC.csv')
+summary(bike_washington)
+colnames(bike_washington)
+bike_washington<-bike_washington%>%#Removing columns: instant, yr, mnth, weekday, workingday, weathersit, atemp, casual and registered users
+  select(-"instant",-"yr",-"mnth",
+         -"weekday",-"workingday",
+         -"weathersit",-"atemp",-"casual",-"registered")%>%
+  rename(Date = 'dteday',Count = "cnt", Hour = "hr",Temperature = "temp", Humidity = "hum" )%>%
+  rename( WindSpeed = "windspeed",Season = "season", Holiday = "holiday" )%>%#renaming columns
+  mutate(Season = factor(Season, levels = c("1", "2", '3', '4'),labels = c("Winter","Spring","Summer","Autumn")))%>%#changing factor levels of seasons
+  mutate(Season = factor(Season, levels = c("Spring", "Summer", 'Autumn', 'Winter')))%>%#ordering them the same way as in seoul dataset
+  mutate(Date = as.Date(Date, tryFormats = c("%d-%m-%Y", "%d/%m/%Y")))%>% #converting date to date object
+  mutate(Holiday = factor(Holiday,levels = c('Holiday', 'No Holiday'),labels = c('Yes', 'No')))%>%
+  mutate(FullDate = make_datetime(day = day(Date),month = month(Date),year = year(Date),hour = Hour))#adding Fulldate column
+bike_washington$Humidity<-sapply(bike_washington$Humidity,function(vec,n){return(vec*n) },n=100)#scaling humidity by multiplying it by 100
+bike_washington$WindSpeed<-sapply(bike_washington$WindSpeed,function(vec,n){return(vec*n)},n=(67000/(60*60)))#scaling windspeed by multiplying it by 67000/3600(67km/hr) to get it in m/s
 ```
 
 ## Including Plots
