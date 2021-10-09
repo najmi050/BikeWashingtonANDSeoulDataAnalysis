@@ -167,12 +167,11 @@ ggplot(bike_washington)+geom_point(aes(x=Humidity,y=Count))+
 
 #Bike Seoul Model
 
-bike_seoul$LoggedCount<-log10(bike_seoul$Count)
+bike_seoul$LoggedCount<-log(bike_seoul$Count)
 #log count as outcome
 
 seoul_model<-lm(LoggedCount~Season+Temperature+Humidity+WindSpeed,data=bike_seoul)
 #predictors are season, temperature, humidity windspeed
-
 summary(seoul_model)
 #It shows that the predictors Autumn, Winter, Temperature, 
 #Humidity and windspeed, have significance.
@@ -180,20 +179,20 @@ summary(seoul_model)
 
 confint(seoul_model,level = 0.97)
 #97% confidence intervals for the estimated regression co-efficients, 
-#they are reliable as sample size is large 8465.
+#they are reliable as sample size is large 8465 and there have low variance.
 
 df_pred<-data.frame(Season="Winter",Temperature=0,WindSpeed=0.5,Humidity=20)
 #values for the model's prediction to be based upon.
 
 predict(seoul_model,newdata = df_pred)
-#2.568 bikes rented in Seoul
+#5.913 bikes rented in Seoul
 
 predict(seoul_model,newdata = df_pred,interval = "prediction",level = 0.90)
 #Therefore, we are (90%) confident with the given parameters, 
-#would at least rent 1.97 bikes and at maximum 3.2 bikes.
+#would at least rent 4.55 bikes and at maximum 7.28 bikes.
 
 #Bike Washington Model
-bike_washington$LoggedCount<-log10(bike_washington$Count)
+bike_washington$LoggedCount<-log(bike_washington$Count)
 washington_model<-lm(LoggedCount~Season+Temperature+Humidity+WindSpeed,data=bike_washington)
 
 summary(washington_model)
@@ -203,14 +202,14 @@ summary(washington_model)
 
 confint(washington_model,level = 0.97)
 #As we have quite a large sample size of 17379, 
-#the confidence intervals for the co-efficients are reliable. 
+#the confidence intervals for the co-efficient are reliable and low variance. 
 
 predict(washington_model,newdata = df_pred)
-#1.58 bikes rented in Washington
+#3.64 bikes rented in Washington
 
 predict(washington_model,newdata = df_pred,interval = "prediction",level = 0.90)
 #Therefore, we are (90%) confident with the given parameters,
-#would at least rent 0.68 bikes and at maximum 2.48 bikes.
+#would at least rent 1.55 bikes and at maximum 5.71 bikes.
 
 
 ```
